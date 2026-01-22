@@ -1,5 +1,4 @@
 /** @type {import('next').NextConfig} */
-const path = require('path');
 
 const nextConfig = {
   output: 'standalone',
@@ -8,11 +7,9 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   },
   
-  // Ensure webpack resolves @ alias correctly (for non-Turbopack builds)
-  webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname);
-    return config;
-  },
+  // Empty turbopack config to acknowledge we're using Turbopack
+  // Path aliases are handled by tsconfig.json
+  turbopack: {},
 }
 
 module.exports = nextConfig
