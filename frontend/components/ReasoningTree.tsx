@@ -168,7 +168,7 @@ function TaskNode({ task, depth = 0, isLast = false }: TaskNodeProps) {
         <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">
           {task.tooluse ? (
             <div className="text-blue-400">
-              {getToolIcon(task.tooluse.tool_name)}
+              {getToolIcon(Array.isArray(task.tooluse) ? task.tooluse[0]?.tool_name : task.tooluse.tool_name)}
             </div>
           ) : task.conclusion ? (
             <CheckCircle className="w-4 h-4 text-green-400" />
@@ -197,7 +197,9 @@ function TaskNode({ task, depth = 0, isLast = false }: TaskNodeProps) {
           )}
           
           {task.tooluse && (
-            <ToolCallDisplay tooluse={task.tooluse} />
+            Array.isArray(task.tooluse) 
+              ? task.tooluse.map((tc, idx) => <ToolCallDisplay key={idx} tooluse={tc} />)
+              : <ToolCallDisplay tooluse={task.tooluse} />
           )}
           
           {task.conclusion && (
