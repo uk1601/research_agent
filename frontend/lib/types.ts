@@ -87,6 +87,14 @@ export interface ProgressEvent {
   message: string;
 }
 
+export interface ActivityEvent {
+  type: 'activity';
+  delta_count: number;
+  elapsed: number;
+  content?: string | null;
+  content_type: 'delta' | 'tool' | 'info' | 'progress';
+}
+
 export interface DoneEvent {
   type: 'done';
   run_id: string;
@@ -100,7 +108,7 @@ export interface ErrorEvent {
   error: string;
 }
 
-export type StreamEvent = StatusEvent | ProgressEvent | DoneEvent | ErrorEvent;
+export type StreamEvent = StatusEvent | ProgressEvent | ActivityEvent | DoneEvent | ErrorEvent;
 
 // View modes
 export type ViewMode = 'tree' | 'json';
