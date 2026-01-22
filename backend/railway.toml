@@ -1,0 +1,18 @@
+# Railway configuration for Backend API
+# This file tells Railway how to build and deploy this service
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Health check endpoint
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+
+# Restart policy
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# Number of instances (1 for starter plan)
+numReplicas = 1

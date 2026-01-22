@@ -1,0 +1,6 @@
+# ArXiv Tool Server - Dependencies
+
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+arxiv==2.1.0
+pydantic==2.6.1

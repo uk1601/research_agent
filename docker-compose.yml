@@ -1,0 +1,94 @@
+# Research Paper Analyzer - Docker Compose
+# 
+# This file orchestrates all three microservices:
+# 1. Frontend (Next.js) - Port 3000
+# 2. Backend (FastAPI) - Port 8000
+# 3. ArXiv Service (FastAPI) - Port 8001
+#
+# Usage:
+#   Development: docker-compose up --build
+#   Production:  docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # ===========================================================================
+  # Frontend - Next.js Application
+  # ===========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - research-network
+
+  # ===========================================================================
+  # Backend - FastAPI Application (Subconscious Integration)
+  # ===========================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SUBCONSCIOUS_API_KEY=${SUBCONSCIOUS_API_KEY}
+      - SUBCONSCIOUS_ENGINE=${SUBCONSCIOUS_ENGINE:-tim-large}
+      - ARXIV_SERVICE_URL=http://arxiv-service:8001
+      - CORS_ORIGINS=["http://localhost:3000","http://frontend:3000"]
+      - DEBUG=false
+    depends_on:
+      arxiv-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - research-network
+
+  # ===========================================================================
+  # ArXiv Service - Separate Microservice for ArXiv Search
+  # ===========================================================================
+  arxiv-service:
+    build:
+      context: ./arxiv-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - research-network
+
+# ===========================================================================
+# Network
+# ===========================================================================
+networks:
+  research-network:
+    driver: bridge
+
+# ===========================================================================
+# Volumes (optional - for persistence if needed later)
+# ===========================================================================
+# volumes:
+#   cache-data:
