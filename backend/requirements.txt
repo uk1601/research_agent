@@ -1,0 +1,22 @@
+# Research Paper Analyzer Backend - Dependencies
+
+# Web Framework
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+
+# SSE Streaming (proper flush handling)
+sse-starlette==2.1.0
+
+# Subconscious SDK
+subconscious-sdk>=0.1.0
+
+# Configuration
+pydantic==2.6.1
+pydantic-settings==2.1.0
+
+# HTTP Client (for potential direct API calls)
+httpx==0.26.0
+
+# Utilities
+python-dotenv==1.0.1
+python-multipart==0.0.9
