@@ -22,13 +22,16 @@ COPY main.py .
 RUN useradd --create-home appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Railway assigns PORT dynamically - don't hardcode
-# EXPOSE is just documentation, Railway ignores it
+# Default port (Railway overrides with $PORT)
+ENV PORT=8001
+
+# Expose default port
 EXPOSE 8001
 
-# Health check - use the PORT env var that Railway sets
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-8001}/health || exit 1
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Run the application - USE $PORT from Railway!
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8001}
+# Run - Railway's startCommand in railway.toml overrides this
+# Using shell form to expand $PORT
+CMD sh -c "uvicorn main:app --host 0.0.0.0 --port $PORT"

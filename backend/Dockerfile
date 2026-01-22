@@ -23,12 +23,16 @@ COPY ./app ./app
 RUN useradd --create-home appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Railway assigns PORT dynamically
+# Default port (Railway overrides with $PORT)
+ENV PORT=8000
+
+# Expose default port
 EXPOSE 8000
 
-# Health check - use the PORT env var that Railway sets
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Run the application - USE $PORT from Railway!
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Run - Railway's startCommand in railway.toml overrides this
+# Using shell form to expand $PORT
+CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
