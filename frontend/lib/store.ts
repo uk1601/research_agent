@@ -163,10 +163,10 @@ export const useResearchStore = create<ResearchState>((set) => ({
     });
   },
   
-  setPhase: (phase, statusMessage, statusDetails = null) => set({ 
+  setPhase: (phase, statusMessage, statusDetails) => set({ 
     phase, 
     statusMessage,
-    statusDetails: statusDetails || null,
+    statusDetails: statusDetails ?? null,
   }),
   
   setProgress: (deltaCount, elapsedTime) => set({ 
