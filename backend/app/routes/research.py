@@ -131,6 +131,9 @@ async def analyze_stream(request: AnalyzeRequest):
                     answer_len = len(str(answer)) if answer else 0
                     reasoning_len = len(event.get("reasoning", []))
                     logger.info(f"[ROUTE] Event #{event_count} [{elapsed:.1f}s] DONE: run_id={run_id}, answer={answer_type}({answer_len} chars), reasoning={reasoning_len} steps")
+                elif event_type == "run_started":
+                    run_id = event.get("run_id", "?")
+                    logger.info(f"[ROUTE] Event #{event_count} [{elapsed:.1f}s] RUN_STARTED: run_id={run_id}")
                 elif event_type == "error":
                     error = event.get("error", "?")
                     logger.error(f"[ROUTE] Event #{event_count} [{elapsed:.1f}s] ERROR: {error}")
@@ -165,6 +168,32 @@ async def analyze_stream(request: AnalyzeRequest):
             "X-Accel-Buffering": "no",  # Disable nginx buffering
         }
     )
+
+
+@router.post("/cancel/{run_id}")
+async def cancel_run(run_id: str):
+    """
+    Cancel a run that's still in progress.
+    
+    This will stop the agent execution on the Subconscious platform.
+    """
+    logger.info(f"[ROUTE] Cancel request for run: {run_id}")
+    
+    try:
+        service = get_subconscious_service()
+        service.cancel_run(run_id)
+        
+        return {
+            "status": "cancelled",
+            "run_id": run_id,
+            "message": "Run cancellation requested successfully"
+        }
+    except Exception as e:
+        logger.error(f"[ROUTE] Failed to cancel run {run_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to cancel run: {str(e)}"
+        )
 
 
 @router.get("/health")

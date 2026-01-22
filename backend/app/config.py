@@ -36,41 +36,33 @@ class Settings(BaseSettings):
     PORT: int = 8000
     DEBUG: bool = False
     
-    # CORS Configuration
-    # In production, set CORS_ORIGINS environment variable as comma-separated list
-    # Example: CORS_ORIGINS=https://your-app.vercel.app,https://your-domain.com
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ]
+    # CORS Configuration - use a plain string to avoid pydantic JSON parsing issues
+    # Set as comma-separated: CORS_ORIGINS=https://app.vercel.app,http://localhost:3000
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
     
-    @field_validator('CORS_ORIGINS', mode='before')
-    @classmethod
-    def parse_cors_origins(cls, v):
-        """Parse CORS origins from comma-separated string or list."""
-        if isinstance(v, str):
-            # Handle comma-separated string from environment variable
-            return [origin.strip() for origin in v.split(',') if origin.strip()]
-        return v
+    def get_cors_origins_list(self) -> List[str]:
+        """Parse CORS origins from comma-separated string."""
+        return [
+            origin.strip().rstrip('/')  # Remove trailing slashes
+            for origin in self.CORS_ORIGINS.split(',') 
+            if origin.strip()
+        ]
     
     # Retry Configuration for TIM Engine Warmup
-    # TIM engines can take 30-90 seconds to warm up on first use
-    # Delay formula: RETRY_DELAY * (2 ^ attempt)
-    # With these defaults: 10s, 20s, 40s, 80s, 160s = ~5 min total wait
     MAX_RETRIES: int = 5
-    RETRY_DELAY: float = 10.0  # Start with 10 seconds
+    RETRY_DELAY: float = 10.0
     
     # Timeouts
     REQUEST_TIMEOUT: int = 120
     STREAM_TIMEOUT: int = 300
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True,
+    }
 
 
-# Use a function without caching during development to pick up env changes
 def get_settings() -> Settings:
-    """Get settings instance (no cache for dev flexibility)."""
+    """Get settings instance."""
     return Settings()

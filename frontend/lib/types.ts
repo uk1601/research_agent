@@ -108,7 +108,13 @@ export interface ErrorEvent {
   error: string;
 }
 
-export type StreamEvent = StatusEvent | ProgressEvent | ActivityEvent | DoneEvent | ErrorEvent;
+export interface RunStartedEvent {
+  type: 'run_started';
+  run_id: string;
+  message?: string;
+}
+
+export type StreamEvent = StatusEvent | ProgressEvent | ActivityEvent | DoneEvent | ErrorEvent | RunStartedEvent;
 
 // View modes
 export type ViewMode = 'tree' | 'json';

@@ -6,13 +6,15 @@ import {
   ChevronUp, 
   Activity, 
   AlertCircle, 
+  AlertTriangle,
   CheckCircle, 
   Info,
   Loader2,
   Terminal,
   Wrench,
   Brain,
-  Clock
+  Clock,
+  XCircle
 } from 'lucide-react';
 import { useResearchStore, ActivityLogEntry } from '@/lib/store';
 
@@ -30,6 +32,10 @@ function getEntryIcon(type: ActivityLogEntry['type']) {
       return <Clock className="w-3.5 h-3.5 text-dark-500" />;
     case 'error':
       return <AlertCircle className="w-3.5 h-3.5 text-red-400" />;
+    case 'warning':
+      return <AlertTriangle className="w-3.5 h-3.5 text-yellow-400" />;
+    case 'cancelled':
+      return <XCircle className="w-3.5 h-3.5 text-orange-400" />;
     default:
       return <Activity className="w-3.5 h-3.5 text-dark-400" />;
   }
@@ -72,6 +78,18 @@ function getEntryStyles(type: ActivityLogEntry['type']) {
         text: 'text-red-300',
         bg: 'bg-red-500/5',
         border: 'border-l-red-500/50',
+      };
+    case 'warning':
+      return {
+        text: 'text-yellow-300',
+        bg: 'bg-yellow-500/5',
+        border: 'border-l-yellow-500/50',
+      };
+    case 'cancelled':
+      return {
+        text: 'text-orange-300',
+        bg: 'bg-orange-500/5',
+        border: 'border-l-orange-500/50',
       };
     default:
       return {

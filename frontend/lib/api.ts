@@ -2,7 +2,8 @@
  * API client for communicating with the backend.
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Remove trailing slash from API URL to prevent double-slash issues
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '');
 
 export interface AnalyzeRequest {
   topic: string;

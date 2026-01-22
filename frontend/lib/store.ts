@@ -23,7 +23,7 @@ export const AVAILABLE_TOOLS = [
 export interface ActivityLogEntry {
   id: number;
   timestamp: Date;
-  type: 'status' | 'delta' | 'tool' | 'info' | 'progress' | 'error';
+  type: 'status' | 'delta' | 'tool' | 'info' | 'progress' | 'error' | 'warning' | 'cancelled';
   message: string;
 }
 

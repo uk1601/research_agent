@@ -76,6 +76,28 @@ class SubconsciousService:
         
         logger.info(f"SubconsciousService initialized - Engine: {self.engine}")
     
+    def cancel_run(self, run_id: str) -> bool:
+        """
+        Cancel a run that's still in progress.
+        
+        Args:
+            run_id: The ID of the run to cancel
+            
+        Returns:
+            True if cancellation was successful
+        """
+        try:
+            logger.info(f"[CANCEL] Cancelling run: {run_id}")
+            self.client.cancel(run_id)
+            logger.info(f"[CANCEL] Successfully cancelled run: {run_id}")
+            return True
+        except SubconsciousError as e:
+            logger.error(f"[CANCEL] Failed to cancel run {run_id}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"[CANCEL] Unexpected error cancelling run {run_id}: {e}")
+            raise
+    
     def _get_tools(self, tool_ids: Optional[List[str]] = None, include_arxiv: bool = True) -> List[Dict[str, Any]]:
         """Build tool configuration based on selected tool IDs."""
         # Default to all tools if none specified
@@ -671,8 +693,21 @@ Begin your research now. Be thorough, be accurate, and be helpful."""
                         if event.type == "delta":
                             delta_count += 1
                             
+                            # Extract run_id from first delta event and send immediately
+                            # This allows frontend to cancel the run at any time
                             if delta_count == 1:
-                                logger.info(f"[STREAM] First delta at {elapsed:.1f}s")
+                                event_run_id = getattr(event, 'run_id', None)
+                                if event_run_id:
+                                    run_id = event_run_id
+                                    logger.info(f"[STREAM] First delta at {elapsed:.1f}s - run_id={run_id}")
+                                    # Send run_started event so frontend can track run_id for cancellation
+                                    queue.put({
+                                        "type": "run_started",
+                                        "run_id": run_id,
+                                        "message": "Research started - you can cancel at any time",
+                                    })
+                                else:
+                                    logger.info(f"[STREAM] First delta at {elapsed:.1f}s - no run_id yet")
                             
                             if delta_count % 50 == 0:
                                 logger.info(f"[STREAM] Delta #{delta_count} at {elapsed:.1f}s")
